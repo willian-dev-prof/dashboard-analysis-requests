@@ -1,7 +1,17 @@
 # Description
-Analysing the health of the system
+Analysing the health of system using panda,plotly and streamlit
 
-### Video Request
+### Install Process
+1 - update the system 
+    sudo apt update && sudo apt upgrade
+2 - install python pip 
+    sudo apt install python3 python3-pip
+3 - Install pandas , streamlit and plotly
+    pip3 install pandas streamlit plotly
+4 - execute the code
+    streamlit run dashboards.py
+
+### Original Query Video Request
 SELECT 
     Cast(coalesce(RV.request_id,"NULL") as char) as request, 
     Cast(coalesce(RV.account_id,"NULL") as char) as account, 
@@ -30,7 +40,7 @@ ORDER BY
     RV.timestamp DESC
 LIMIT 1000;
 
-### video file details
+### Original Query Video File Details
 select 
 	Cast(coalesce(VFD.request_id,"NULL") as char) as request , 
     Cast(coalesce(VFD.dvr_id,"NULL") as char) as dvr,
@@ -50,7 +60,7 @@ ORDER BY
     VFD.timestamp DESC
 limit 100000;
 
-### transaction tracker
+### Original Query Transaction Tracker
 SELECT 
 	Cast(coalesce(TT.request_id,"NULL") as char) as request ,
     Cast(coalesce(RV.dvr_id,"NULL") as char) as dvr ,
