@@ -1,12 +1,16 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from utils.util import filter_details,filter_request_video
+from utils.util import filter_details,filter_request_video,filter_general
 
 st.set_page_config(layout="wide")
 
-df = pd.read_csv("request_videos.CSV",sep=",", decimal=";")
-vfd = pd.read_csv("video_file_details.CSV",sep=",", decimal=";")
+df = pd.read_csv("request_videos.CSV",sep=",")
+vfd = pd.read_csv("video_file_details.CSV",sep=",")
+tt = pd.read_csv("transaction_tracker.CSV",sep=",")
+
+st.sidebar.header("General Videos Filter")
+df,vfd,tt = filter_general(df,vfd,tt)
 
 st.sidebar.header("Request Videos Filter")
 df_filtered = filter_request_video(df)
@@ -49,6 +53,10 @@ Number_status_total = px.pie(vfd,names=names,values=values,title="Video Status")
 col7.plotly_chart(Number_temporary_size_day,use_container_width=True)
 col8.plotly_chart(Number_format_total,use_container_width=True)
 col9.plotly_chart(Number_status_total,use_container_width=True)
+
+# transaction tracker
+st.header("Transaction Tracker")
+st.dataframe(tt)
 
 # consolidation the data in end of the system
 st.header("Consolidation")
