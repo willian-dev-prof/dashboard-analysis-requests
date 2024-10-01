@@ -3,6 +3,17 @@ import pandas as pd
 
 
 def filter_general(df,vfd,tt):
+    '''
+    Filter the dataframes based on selected requests and DVRs from the sidebar multiselect widgets.
+
+    Parameters:
+    - df (pandas.DataFrame): The main dataframe containing the data to be filtered.
+    - vfd (pandas.DataFrame): The VFD dataframe to be filtered based on requests and DVRs.
+    - tt (pandas.DataFrame): The TT dataframe to be filtered based on requests and DVRs.
+
+    Returns:
+    - Tuple[pandas.DataFrame, pandas.DataFrame, pandas.DataFrame]: Filtered dataframes for df, vfd, and tt respectively.
+    '''
     df["dvr"] = df["dvr"].astype(str)
     vfd["dvr"] = vfd["dvr"].astype(str)
     tt["dvr"] = tt["dvr"].astype(str)
@@ -27,6 +38,15 @@ def filter_general(df,vfd,tt):
     return df,vfd,tt
 
 def filter_details(vfd):
+    '''
+    Filter details based on selected status and issue filters.
+
+    Args:
+        vfd (pandas.DataFrame): DataFrame containing details to be filtered.
+
+    Returns:
+        pandas.DataFrame: Filtered DataFrame based on selected status and issue filters.
+    '''
     vfd["timestamp"] = vfd["timestamp"].str.strip()
     vfd["timestamp"] = pd.to_datetime(vfd["timestamp"], format="%Y-%m-%d %H:%M:%S", errors='coerce')
     vfd = vfd.sort_values("timestamp", ascending=False)
@@ -52,6 +72,9 @@ def filter_details(vfd):
     return vfd
 
 def filter_request_video(df):
+    '''
+    Filter the given DataFrame based on user-selected criteria such as day, source, account, and specific issues. Return the filtered DataFrame.
+    '''
     df["timestamp"] = df["timestamp"].str.strip()
     df["timestamp"] = pd.to_datetime(df["timestamp"], format="%Y-%m-%d %H:%M:%S", errors='coerce')
     df = df.sort_values("timestamp", ascending=False)
