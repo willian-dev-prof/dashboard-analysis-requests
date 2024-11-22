@@ -1,3 +1,6 @@
+# pylint: disable=unused-argument
+# pylint: disable=import-error
+# pylint: disable=broad-exception-caught
 import streamlit as st
 import pandas as pd
 
@@ -73,14 +76,15 @@ def filter_details(vfd):
 
 def filter_request_video(df):
     '''
-    Filter the given DataFrame based on user-selected criteria such as day, source, account, and specific issues. Return the filtered DataFrame.
+    Filter the given DataFrame based on user-selected criteria such as day, source, account, 
+    and specific issues. Return the filtered DataFrame.
     '''
     df["timestamp"] = df["timestamp"].str.strip()
     df["timestamp"] = pd.to_datetime(df["timestamp"], format="%Y-%m-%d %H:%M:%S", errors='coerce')
     df = df.sort_values("timestamp", ascending=False)
 
     df["Diference"] = abs(df["received"] - df["uploaded"])
-    
+
     df["Day"] = df["timestamp"].apply(lambda x: str(x.month) +"-"+str(x.day))
     filter_by_day = df["Day"].unique().tolist()
     day = st.sidebar.multiselect("Day",options=filter_by_day)
@@ -90,10 +94,12 @@ def filter_request_video(df):
     source = st.sidebar.multiselect("Source",options=filter_by_source)
 
     df["account"] = df["account"].str.strip()
-    filter_by_Account = df["account"].unique().tolist()
-    account = st.sidebar.multiselect("Account",options=filter_by_Account)
+    filter_by_account = df["account"].unique().tolist()
+    account = st.sidebar.multiselect("Account",options=filter_by_account)
 
-    filter_by_problems = ["All","Diference Received x Uploaded","Video Details > 200","Video Details > 1000","Videos Uploaded > 200","Videos Uploaded > 1000"]
+    filter_by_problems = ["All","Diference Received x Uploaded",
+                          "Video Details > 200","Video Details > 1000",
+                          "Videos Uploaded > 200","Videos Uploaded > 1000"]
     issue = st.sidebar.multiselect("Issue",options=filter_by_problems)
 
     if len(day) > 0:
@@ -109,17 +115,17 @@ def filter_request_video(df):
 
     if "Diference Received x Uploaded" in issue:
         df_filtered = df_filtered[df_filtered["Diference"] > 0]
-    
+
     if "Video Details > 200" in issue:
-         df_filtered = df_filtered[df_filtered["videos_details"] > 200]
-    
+        df_filtered = df_filtered[df_filtered["videos_details"] > 200]
+
     if "Video Details > 1000" in issue:
-         df_filtered = df_filtered[df_filtered["videos_details"] > 1000]
-    
+        df_filtered = df_filtered[df_filtered["videos_details"] > 1000]
+
     if "Videos Uploaded > 200" in issue:
-         df_filtered = df_filtered[df_filtered["uploaded"] > 200]
+        df_filtered = df_filtered[df_filtered["uploaded"] > 200]
 
     if "Videos Uploaded > 1000" in issue:
-         df_filtered = df_filtered[df_filtered["uploaded"] > 1000]
+        df_filtered = df_filtered[df_filtered["uploaded"] > 1000]
 
     return df_filtered

@@ -1,3 +1,6 @@
+# pylint: disable=unused-argument
+# pylint: disable=import-error
+# pylint: disable=broad-exception-caught
 '''
 Module for displaying various dashboards related to request videos, video file details, transaction tracking, and data consolidation.
 
@@ -10,10 +13,14 @@ Dependencies:
 - utils.util.filter_general
 
 Functions:
-- request_videos(df_filtered): Display bar charts showing the number of videos uploaded, received, and the difference between received and uploaded per day.
-- video_file_details(vfd): Display details of video files including total size, format distribution, and status distribution.
+- request_videos(df_filtered): Display bar charts showing the number of videos uploaded, 
+  received, and the difference between received and uploaded per day.
+- video_file_details(vfd): Display details of video files including total size,
+ format distribution, and status distribution.
 - transaction_tracker(tt): Display a DataFrame `tt` in the Streamlit app.
-- consolidation(df_filtered, vfd): Display statistics such as total requests, errors, videos, completed videos, pending videos, and videos with errors. Generates pie charts to visualize data distribution by different categories.
+- consolidation(df_filtered, vfd): Display statistics such as total requests, errors,
+  videos, completed videos, pending videos, and videos with errors. Generates pie charts
+  to visualize data distribution by different categories.
 '''
 import streamlit as st
 import pandas as pd
@@ -27,33 +34,65 @@ def request_videos(df_filtered):
         Parameters:
             - df_filtered: DataFrame containing filtered data.
 
-        Displays bar charts showing the number of videos uploaded, received, and the difference between received and uploaded per day.
+        Displays bar charts showing the number of videos uploaded, received, 
+        and the difference between received and uploaded per day.
     '''
     st.header("Request Videos")
     columns_to_drop = ["Diference", "Day"]
     st.dataframe(df_filtered.drop(columns=columns_to_drop))
 
     col1 , col2 , col3 = st.columns(3)
-    Number_uploaded_by_day = px.bar(df_filtered, x="Day", y="uploaded",color="source",title="Number of Uploaded per Day")
-    Number_received_by_day = px.bar(df_filtered, x="Day", y="received",color="source",title="Number of Received per Day")
-    Number_diference_beetween_received_uploaded = px.bar(df_filtered, x="Day", y="Diference",color="source",title="Diference Between Received x Uploaded")
-    col1.plotly_chart(Number_uploaded_by_day,use_container_width=True)
-    col2.plotly_chart(Number_received_by_day,use_container_width=True)
-    col3.plotly_chart(Number_diference_beetween_received_uploaded,use_container_width=True)
+    number_uploaded_by_day = px.bar(df_filtered,
+                                    x="Day",
+                                    y="uploaded",
+                                    color="source",
+                                    title="Number of Uploaded per Day")
+    number_received_by_day = px.bar(df_filtered,
+                                    x="Day",
+                                    y="received",
+                                    color="source",
+                                    title="Number of Received per Day")
+    number_diference_beetween_rec_upl = px.bar(df_filtered,
+                                               x="Day",
+                                               y="Diference",
+                                               color="source",
+                                               title="Diference Between Received x Uploaded")
+    col1.plotly_chart(number_uploaded_by_day,use_container_width=True)
+    col2.plotly_chart(number_received_by_day,use_container_width=True)
+    col3.plotly_chart(number_diference_beetween_rec_upl,use_container_width=True)
 
 def video_file_details(vfd):
     '''
-        Display details of video files including total size, format distribution, and status distribution.
+        Display details of video files including total size, format distribution,
+        and status distribution.
     '''
     st.header("Details Videos")
     vfd["total_size"] = vfd["original_size"] + vfd["converted_size"]
     columns_to_drop = ["Day","total_size"]
     st.dataframe(vfd.drop(columns=columns_to_drop))
     col7 , col8 , col9 = st.columns(3)
-    Number_temporary_size_day = px.bar(vfd, x="Day", y="total_size",title="Total MB in S3 Per Day")
+    number_temporary_size_day = px.bar(vfd, x="Day", y="total_size",title="Total MB in S3 Per Day")
     vfd_ts = vfd[vfd["format"] == "ts"].shape[0]
     vfd_h264 = vfd[vfd["format"] == "h264"].shape[0]
-    Number_format_total = px.pie(vfd,names=["ts","h264"],values=[vfd_ts,vfd_h264],title="Video Format")
+    number_format_total = px.pie(vfd,names=["ts","h264"],
+                                 values=[vfd_ts,vfd_h264],title="Video Format")
+    values,names = video_by_status(vfd)
+    number_status_total = px.pie(vfd,names=names,values=values,title="Video Status")
+
+    col7.plotly_chart(number_temporary_size_day,use_container_width=True)
+    col8.plotly_chart(number_format_total,use_container_width=True)
+    col9.plotly_chart(number_status_total,use_container_width=True)
+
+def video_by_status(vfd):
+    """
+        Calculate the count of video files based on their status.
+
+        Parameters:
+        vfd (DataFrame): A DataFrame containing video file details with a 'status' column.
+
+        Returns:
+        tuple: A tuple containing a list of counts for each status and a list of status names.
+    """
     vfd_conv_fail = vfd[vfd["status"] == "convFail"].shape[0]
     vfd_pending = vfd[vfd["status"] =="pending"].shape[0]
     vfd_completed = vfd[vfd["status"] =="completed"].shape[0]
@@ -61,11 +100,8 @@ def video_file_details(vfd):
     vfd_less_50 = vfd[vfd["status"] =="Less than 50.0 KiB"].shape[0]
     names = ["convFail","peding","completed","less than 100","less than 50"]
     values = [vfd_conv_fail,vfd_pending,vfd_completed,vfd_less_100,vfd_less_50]
-    Number_status_total = px.pie(vfd,names=names,values=values,title="Video Status")
 
-    col7.plotly_chart(Number_temporary_size_day,use_container_width=True)
-    col8.plotly_chart(Number_format_total,use_container_width=True)
-    col9.plotly_chart(Number_status_total,use_container_width=True)
+    return values,names
 
 def transaction_tracker(tt):
     '''
@@ -78,7 +114,8 @@ def transaction_tracker(tt):
 def consolidation(df_filtered,vfd):
     '''
         Function to display the consolidation of request and video data.
-        Calculates various statistics such as total requests, errors, videos, completed videos, pending videos, and videos with errors.
+        Calculates various statistics such as total requests, errors, videos, 
+        completed videos, pending videos, and videos with errors.
         Generates pie charts to visualize data distribution by different categories.
     '''
     st.header("Consolidation")
@@ -111,23 +148,40 @@ def consolidation(df_filtered,vfd):
     labels = ["Received", "Uploaded"]
     colors_total = ['#636EFA', '#EF553B']
     values_total = [df_received,df_uploaded]
-    Number_request_total = px.pie(df_filtered,names=labels,color_discrete_sequence=colors_total,
+    number_request_total = px.pie(df_filtered,names=labels,color_discrete_sequence=colors_total,
                               values=values_total,title="Received x Uploaded")
     labels_type = ["Offline", "Online","Vehicle"]
     colors_type = ['#636EFA', '#EF553B', '#FFFF00']
     values_type = [df_filtered_source_offline,df_filtered_source_online,df_filtered_source_push]
-    Number_request_type = px.pie(df_filtered,names=labels_type,color_discrete_sequence=colors_type,
+    number_request_type = px.pie(df_filtered,names=labels_type,color_discrete_sequence=colors_type,
                              values=values_type,title="Request Videos By Type")
     labels_status = ["Error", "Pending","Completed"]
     colors_status = ['#EF553B', '#636EFA','#FFFF00']
     values_color = [videos_error,videos_pending,videos_completed]
-    Number_videos_status = px.pie(df_filtered,names=labels_status,color_discrete_sequence=colors_status,
-                              values=values_color,title="Videos by Status")
-    col4.plotly_chart(Number_request_total,use_container_width=True)
-    col5.plotly_chart(Number_request_type,use_container_width=True)
-    col6.plotly_chart(Number_videos_status,use_container_width=True)
+    number_videos_status = px.pie(df_filtered,names=labels_status,
+                                  color_discrete_sequence=colors_status,
+                                  values=values_color,title="Videos by Status")
+    col4.plotly_chart(number_request_total,use_container_width=True)
+    col5.plotly_chart(number_request_type,use_container_width=True)
+    col6.plotly_chart(number_videos_status,use_container_width=True)
 
 def handler():
+    """
+        Configure the Streamlit page layout and handle the display of various dashboards.
+
+        This function reads data from CSV files, applies filters to the data using
+        sidebar widgets, and displays different dashboards including request videos,
+        video file details, transaction tracker, and data consolidation.
+
+        Steps:
+        1. Set the Streamlit page layout to wide.
+        2. Load data from 'request_videos.CSV', 'video_file_details.CSV', 
+        and 'transaction_tracker.CSV'.
+        3. Apply general filters to the data using sidebar widgets.
+        4. Apply specific filters for request videos and video details.
+        5. Display dashboards for request videos, video file details, 
+        transaction tracker, and consolidation.
+    """
     st.set_page_config(layout="wide")
     df = pd.read_csv("request_videos.CSV",sep=",")
     vfd = pd.read_csv("video_file_details.CSV",sep=",")
@@ -142,16 +196,12 @@ def handler():
     st.sidebar.header("Details Videos Filter")
     vfd = filter_details(vfd)
 
-    # Information by Resquest_Videos
     request_videos(df_filtered)
 
-    # Information by Video_File_Details
     video_file_details(vfd)
 
-    # transaction tracker
     transaction_tracker(tt)
 
-    # consolidation the data in end of the system
     consolidation(df_filtered,vfd)
 
 handler()
